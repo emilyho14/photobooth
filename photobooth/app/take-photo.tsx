@@ -1,7 +1,7 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, router } from "expo-router";
-import { useRef, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { PHOTO_STRIP_THEMES } from "@/constants/photostripThemes";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,6 +12,35 @@ export default function TakePhotoScreen() {
     const selectedTheme = PHOTO_STRIP_THEMES.find(
         (theme) => theme.id === themeId
     )
+
+    const { width } = useWindowDimensions();
+    
+    const scaleFont = (size: number) => {
+        const baseWidth = 390;
+        const scale = width / baseWidth;
+        const scaledSize = size * scale;
+
+        return Math.round(Math.min(Math.max(scaledSize, size * 0.9), size * 1.25));
+    };
+
+    const pulse = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+            Animated.timing(pulse, {
+                toValue: 1.08,
+                duration: 700,
+                useNativeDriver: true,
+            }),
+            Animated.timing(pulse, {
+                toValue: 1,
+                duration: 700,
+                useNativeDriver: true,
+            }),
+            ])
+        ).start();
+    }, []);
 
     const [ permission, requestPermission ] = useCameraPermissions()
     const [ started, setStarted ] = useState(false);
@@ -86,7 +115,8 @@ export default function TakePhotoScreen() {
 
     if (started) {
         return (
-            <View style={{ flex: 1 }}>
+            <View>
+
             <CameraView
                 ref={cameraRef}
                 style={{ flex: 1 }}
@@ -126,17 +156,55 @@ export default function TakePhotoScreen() {
     }
 
     return (
-        <View>
-            <TouchableOpacity onPress={() => router.back()}>
-                <Text> Back </Text>
+        <View style={styles.page}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.push("/select-theme")}>
+                <Text style={[styles.backText, { fontSize: scaleFont(16)}]}> Back </Text>
             </TouchableOpacity>
-            <Text> Selected Theme: {selectedTheme?.name} </Text>
+            <Text style={[styles.selectionText, { fontSize: scaleFont(32), lineHeight: scaleFont(40) }]} > Theme Selection: {selectedTheme?.name} </Text>
 
             <TouchableOpacity onPress={handleCameraPermissions}>
-                <Text> Let's Begin! </Text>
+                <Animated.Text style={[styles.beginButton, { fontSize: scaleFont(28), lineHeight: scaleFont(36), transform: [{scale: pulse}], }]}> Let's Begin! ʕ•ᴥ•ʔ⁠っ  ♡ </Animated.Text>
             </TouchableOpacity>
 
         </View>
 
     );
 };
+
+const styles = StyleSheet.create({
+    page: {
+    flex: 1,
+    backgroundColor: "#FFF2E8",
+    paddingHorizontal: 24,
+    paddingTop: 70,
+  },
+  backButton: {
+    width: "12%",
+
+    alignSelf: "flex-start",
+    backgroundColor: "#F6C7B3",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    marginBottom: 32,
+  },
+  backText: {
+    textAlign: "center",
+    color: "#4A2418",
+    // fontSize: 16,
+    fontWeight: "700",
+  },
+  selectionText: {
+    fontWeight: "800",
+    color: "#4A2418",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  beginButton: {
+    alignSelf: "center",
+    textAlign: "center",
+    color: "#4A2418",
+    fontWeight: "400",
+    marginTop: 25
+  }
+});

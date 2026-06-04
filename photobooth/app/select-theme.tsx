@@ -75,12 +75,10 @@ const styles = StyleSheet.create({
   backText: {
     textAlign: "center",
     color: "#4A2418",
-    // fontSize: 16,
     fontWeight: "700",
   },
 
   title: {
-    // fontSize: 32,
     fontWeight: "800",
     color: "#4A2418",
     textAlign: "center",
@@ -88,7 +86,6 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    // fontSize: 24,
     color: "#8A5A44",
     textAlign: "center",
     marginBottom: 32,
